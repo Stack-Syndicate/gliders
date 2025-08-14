@@ -5,6 +5,8 @@
 [![Rust](https://img.shields.io/badge/Rust-%23000000.svg?e&logo=rust&logoColor=red)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/mit/)
 
+This crate is nowhere near ready for actual use.
+
 ## What?
 
 It's my attempt at building my ideal programming language by leveraging another programming language that already comes painfully close. Expect constant breakages and long-term updates.
