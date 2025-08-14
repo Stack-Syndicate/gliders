@@ -8,7 +8,7 @@ keywords = ["stochastic", "statistics", "simulation", "randomness", "agents"]
 categories = ["development-tools", "mathematics", "rust-patterns", "concurrency"]
 license = "MIT"
 license-file = "LICENSE"
-repository = "https://github.com/Stack-Syndicate/stochos"
+repository = "https://github.com/Stack-Syndicate/gliders"
 
 [dependencies]
-
+gliders_proc_macro = {path="proc_macro"}
