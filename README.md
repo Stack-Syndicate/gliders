@@ -1,9 +1,10 @@
 # GlideRS
 
-[![Crates.io](https://img.shields.io/crates/v/gliders.svg)](https://crates.io/crates/gliders)
-[![Docs.rs](https://docs.rs/gliders/badge.svg)](https://docs.rs/gliders)
-[![Rust](https://img.shields.io/badge/Rust-%23000000.svg?e&logo=rust&logoColor=red)](https://www.rust-lang.org/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/mit/)
+[![Crates.io](https://img.shields.io/crates/v/gliders.svg?style=for-the-badge&logo=crates.io)](https://crates.io/crates/gliders)
+[![Docs.rs](https://img.shields.io/badge/docs.rs-gliders-blue?style=for-the-badge&logo=docs.rs)](https://docs.rs/gliders)
+[![Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust)](https://www.rust-lang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-7F0000?style=for-the-badge&labelColor=000000&logoColor=white)](LICENSE)
+[![Support on Ko-fi](https://img.shields.io/badge/ko--fi-Donate-999999?style=for-the-badge&logo=ko-fi&labelColor=333333)](https://ko-fi.com/stacksyndicate)
 
 This crate is nowhere near ready for actual use.
 
