@@ -1,28 +1,29 @@
-program         =  { SOI ~ expr* ~ EOI }
-expr            =  { (obj | fn | var | expr_eval)+ }
-expr_eval       =  { (at_fn_call | fn_call | obj_inst | operation | literal) }
-obj             =  { obj_identifier ~ "{" ~ expr+? ~ "}" }
-obj_inst        =  { obj_identifier ~ "(" ~ params? ~ ")" }
-fn              =  { "fn" ~ identifier ~ "(" ~ params_def? ~ ")" ~ "{" ~ (expr*)? ~ "}" }
-fn_call         =  { identifier ~ "(" ~ params? ~ ")" }
-at_fn_call      = ${ "@" ~ identifier ~ "(" ~ params? ~ ")" }
-var             =  { definition | assignment }
-obj_identifier  = @{ ASCII_ALPHA_UPPER ~ (ASCII_ALPHANUMERIC | "_")* }
-identifier      = @{ ASCII_ALPHA_LOWER ~ (ASCII_ALPHANUMERIC | "_")* }
-params_def      =  { ((identifier) ~ ("," ~ identifier)*)? }
-params          =  { ((expr_eval) ~ ("," ~ expr_eval)*)? }
-definition      =  { "let" ~ identifier ~ "=" ~ expr_eval ~ ";" }
-assignment      =  { identifier ~ "=" ~ (expr_eval | identifier) ~ ";" }
-operation       =  { operand ~ (operator ~ operand)+ }
-operand         =  { literal | identifier }
-operator        =  { "+" | "-" | "*" | "/" | "%" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "@" }
-literal         =  { number | boolean | string }
-number          =  { float | discrete_number }
-discrete_number = @{ ASCII_DIGIT+ | "0x" ~ (ASCII_HEX_DIGIT)+ | "0b" ~ ASCII_BIN_DIGIT+ }
-float           = @{ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+) }
-boolean         = @{ "true" | "false" }
-string          = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" | "'" ~ (!"'" ~ ANY)* ~ "'" }
+program    =  { SOI ~ expression* ~ EOI }
+expression =  { (definition | assignment) ~ ";" }
 
-// --------------------------
-WHITESPACE = _{ " " | "\t" | "\n" | "\r" }
+// Asignment and definitions
+definition =  { "let" ~ identifier ~ "=" ~ (evaluation | literal) }
+assignment =  { identifier ~ "=" ~ (evaluation | literal) }
+identifier = @{ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
+
+// Literals
+literal    =  { float | number | string | bool | list }
+float      = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
+number     = @{ ASCII_DIGIT+ }
+string     = @{ "\"" ~ ("\\\"" | !("\"") ~ ANY)* ~ "\"" }
+bool       =  { "true" | "false" }
+list       =  { "[" ~ ((identifier|evaluation|literal) ~ ",")* ~ (identifier|evaluation|literal) ~ "]" }
+
+// Operations and operators
+evaluation  = { operation | term }
+operation   = { term ~ (operator ~ term)+ }
+term        = { literal | identifier | "(" ~ evaluation ~ ")" }
+operator   =  { add | sub | mul | div }
+add        = @{ "+" }
+sub        = @{ "-" }
+mul        = @{ "*" }
+div        = @{ "/" }
+
+// ---------------------------------------
+WHITESPACE = _{ " " | "\t" | NEWLINE }
 COMMENT    = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }

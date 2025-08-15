@@ -1,7 +1,7 @@
 mod parsing;
 use pest::{Parser, iterators::Pair};
 use proc_macro2::TokenStream;
-use syn::{LitBool, LitFloat, LitInt};
+use syn::{LitBool, LitFloat};
 use parsing::*;
 use quote::quote;
 
@@ -18,6 +18,7 @@ pub fn glider(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     };
     for pair in parsed_code {
         let rust_code = gen_rust_code(pair);
+        println!("{}", rust_code);
         result_token_stream.extend(rust_code);
     }
     return result_token_stream.into();
@@ -26,89 +27,95 @@ pub fn glider(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 fn gen_rust_code(pair: Pair<Rule>) -> TokenStream {
     let mut result_token_stream = TokenStream::new();
     match pair.as_rule() {
-        Rule::program => {
+        Rule::expression => {
+            let expression = pair.into_inner();
+            for pair in expression {
+                result_token_stream.extend(gen_rust_code(pair));
+            }
+            result_token_stream.extend(quote! { ; });
+        }
+        Rule::definition => {
+            let mut def = pair.into_inner();
+            let ident = gen_rust_code(def.next().unwrap());
+            let expr = gen_rust_code(def.next().unwrap());
+            result_token_stream.extend(quote! { let mut #ident = #expr });
+        }
+        Rule::assignment => {
+            let mut def = pair.into_inner();
+            let ident = gen_rust_code(def.next().unwrap());
+            let expr = gen_rust_code(def.next().unwrap());
+            result_token_stream.extend(quote! { #ident = #expr });
+        }
+        Rule::identifier => {
+            let ident = syn::parse_str::<syn::Ident>(pair.as_str()).unwrap();
+            result_token_stream.extend(quote! { #ident });
+        }
+        Rule::float => {
+            let float_lit = syn::parse_str::<LitFloat>(pair.as_str()).unwrap();
+            result_token_stream.extend(quote! { #float_lit });
+        }
+        Rule::number => {
+            let int_lit = syn::parse_str::<LitFloat>(&(pair.as_str().to_string()+".0")).unwrap();
+            result_token_stream.extend(quote! { #int_lit });
+        }
+        Rule::bool => {
+            let bool_lit = syn::parse_str::<LitBool>(pair.as_str()).unwrap();
+            result_token_stream.extend(quote! { #bool_lit });
+        }
+        Rule::string => {
+            let string_lit = syn::parse_str::<syn::LitStr>(pair.as_str()).unwrap();
+            result_token_stream.extend(quote! { #string_lit });
+        }
+        // list = { "[" ~ ((identifier|evaluation|literal) ~ ",")* ~ (identifier|evaluation|literal) ~ "]" }
+        Rule::list => {
+            let list = pair.into_inner();
+            let elements: Vec<TokenStream> = list.map(gen_rust_code).collect();
+            result_token_stream.extend(quote! { [#(#elements),*] });
+        }
+        //term = { literal | identifier | "(" ~ evaluation ~ ")" }
+        Rule::term => {
+            let mut inner = pair.into_inner();
+            if let Some(inner_pair) = inner.next() {
+                match inner_pair.as_rule() {
+                    Rule::evaluation => {
+                        let eval_tokens = gen_rust_code(inner_pair);
+                        result_token_stream.extend(quote! { ( #eval_tokens ) });
+                    }
+                    _ => {
+                        let tokens = gen_rust_code(inner_pair);
+                        result_token_stream.extend(tokens);
+                    }
+                }
+            }
+        }
+        Rule::operation => {
+            let mut operation = pair.into_inner();
+            while operation.len() > 0 {
+                let left = gen_rust_code(operation.next().unwrap());
+                let operator = gen_rust_code(operation.next().unwrap());
+                let right = gen_rust_code(operation.next().unwrap());
+                result_token_stream.extend(quote! { #left #operator #right });
+            }
+        }
+        Rule::add => {
+            result_token_stream.extend(quote! { + });
+        }
+        Rule::sub => {
+            result_token_stream.extend(quote! { - });
+        }
+        Rule::mul => {
+            result_token_stream.extend(quote! { * });
+        }
+        Rule::div => {
+            result_token_stream.extend(quote! { / });
+        }
+        Rule::EOI => {
+            return result_token_stream
+        }
+        _ => {
             for pair in pair.into_inner() {
                 result_token_stream.extend(gen_rust_code(pair));
             }
-            return result_token_stream;
-        },
-        Rule::assignment => {
-            let mut assignment = pair.into_inner();
-            let ident = gen_rust_code(assignment.next().unwrap());
-            let expr = gen_rust_code(assignment.next().unwrap());
-            result_token_stream.extend(quote! {#ident = #expr})
-        },
-        Rule::definition => {
-            let mut definition = pair.into_inner();
-            let ident = gen_rust_code(definition.next().unwrap());
-            let expr = gen_rust_code(definition.next().unwrap());
-            result_token_stream.extend(quote! {let #ident = #expr;});
-        },
-        Rule::identifier => {
-            let ident = syn::parse_str::<syn::Ident>(pair.as_str()).unwrap();
-            result_token_stream.extend(quote! {#ident});
-        },
-        Rule::expr_eval => {
-            let expr_eval = pair.into_inner();
-            for pair in expr_eval {
-                result_token_stream.extend(gen_rust_code(pair));
-            }
-        },
-        Rule::fn_call => {
-            let mut fn_call = pair.into_inner();
-            let ident = gen_rust_code(fn_call.next().unwrap());
-            let params = gen_rust_code(fn_call.next().unwrap());
-            result_token_stream.extend(quote! {#ident(#params)});
-        },
-        Rule::params => {
-            let mut params = pair.into_inner();
-            while params.len() > 0 {
-                result_token_stream.extend(gen_rust_code(params.next().unwrap()));
-            }
-        },
-        Rule::literal => {
-            let mut literal = pair.into_inner();
-            while literal.len() > 0 {
-                result_token_stream.extend(gen_rust_code(literal.next().unwrap()));
-            }
-        },
-        Rule::number => {
-            let number = pair.into_inner().next().unwrap();
-            result_token_stream.extend(gen_rust_code(number));
-        },
-        Rule::string => {
-            let string = pair.as_str();
-            result_token_stream.extend(quote! {#string});
-        },
-        Rule::boolean => {
-            let boolean = syn::parse_str::<LitBool>(pair.as_str()).unwrap();
-            result_token_stream.extend(quote! {#boolean});
-        },
-        Rule::discrete_number => {
-            let discrete_number = syn::parse_str::<LitInt>(pair.as_str()).unwrap();
-            result_token_stream.extend(quote! {#discrete_number});
-        },
-        Rule::float => {
-            let float = syn::parse_str::<LitFloat>(pair.as_str()).unwrap();
-            result_token_stream.extend(quote! {#float});
-        },
-        Rule::expr => {
-            let mut expr = pair.into_inner();
-            while expr.len() > 0 {
-                result_token_stream.extend(gen_rust_code(expr.next().unwrap()));
-            }
-        },
-        Rule::EOI => {
-            return result_token_stream;
-        },
-        Rule::var => {
-            let mut var = pair.into_inner();
-            while var.len() > 0 {
-                result_token_stream.extend(gen_rust_code(var.next().unwrap()));
-            }
-        },
-        _ => {
-            return result_token_stream;
         }
     }
     return result_token_stream;

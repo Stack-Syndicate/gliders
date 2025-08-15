@@ -2,7 +2,7 @@
 name = "gliders"
 authors = ["Glenn Wallace glennw-coding@proton.me"]
 description = "A simple but expressive programming language which transpiles to Rust."
-version = "0.0.2"
+version = "0.0.3"
 edition = "2024"
 keywords = ["compiler", "convenience", "parser"]
 categories = ["development-tools", "parser-implementations"]
