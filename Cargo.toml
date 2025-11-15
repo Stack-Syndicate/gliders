@@ -2,7 +2,7 @@
 name = "gliders"
 authors = ["Glenn Wallace glennw-coding@proton.me"]
 description = "A compute shader library with minimal boilerplate."
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 keywords = ["convenience"]
 categories = ["development-tools"]

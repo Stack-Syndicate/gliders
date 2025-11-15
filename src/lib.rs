@@ -37,8 +37,6 @@ mod tests {
         sd.run_shader(&shader, &[1, 1, 1]);
         let result: Vec<f32> = sd.read_buffer(&shader, 1);
         sd.update_buffer(&mut shader, &result, 0);
-        // assert_eq!(result.len(), 1);
-        // assert_eq!(result[0].x, input.x * 2.0);
 
         println!("Test passed, output: {:?}", result);
     }
