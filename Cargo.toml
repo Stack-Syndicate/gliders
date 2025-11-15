@@ -1,26 +1,18 @@
 [package]
 name = "gliders"
 authors = ["Glenn Wallace glennw-coding@proton.me"]
-description = "A simple but expressive programming language which transpiles to Rust."
-version = "0.0.3"
+description = "A compute shader library with minimal boilerplate."
+version = "0.1.0"
 edition = "2024"
-keywords = ["compiler", "convenience", "parser"]
-categories = ["development-tools", "parser-implementations"]
-license = "MIT"
+keywords = ["convenience"]
+categories = ["development-tools"]
 license-file = "LICENSE"
 repository = "https://github.com/Stack-Syndicate/gliders"
 
 [lib]
-proc-macro = true
 path = "src/lib.rs"
 
-[[bin]]
-name = "gliders"
-path = "src/main.rs"
-
 [dependencies]
-pest = "2.8.1"
-pest_derive = "2.8.1"
-proc-macro2 = "1.0.97"
-quote = "1.0.40"
-syn = { version = "2.0.105", features = ["full"] }
+bytemuck = "1.24.0"
+pollster = "0.4.0"
+wgpu = "27.0.1"
