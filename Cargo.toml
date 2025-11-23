@@ -1,8 +1,8 @@
 [package]
 name = "gliders"
 authors = ["Glenn Wallace glennw-coding@proton.me"]
-description = "A compute shader library with minimal boilerplate."
-version = "0.1.1"
+description = "A library for rough prototyping and convenience."
+version = "0.2.0"
 edition = "2024"
 keywords = ["convenience"]
 categories = ["development-tools"]
@@ -13,6 +13,8 @@ repository = "https://github.com/Stack-Syndicate/gliders"
 path = "src/lib.rs"
 
 [dependencies]
-bytemuck = "1.24.0"
-pollster = "0.4.0"
-wgpu = "27.0.1"
+bumpalo = { version = "3.19.0", features = ["collections"] }
+env_logger = "0.11.8"
+log = "0.4.28"
+once_cell = { version = "1.21.3", features = ["parking_lot"] }
+parking_lot = "0.12.5"
